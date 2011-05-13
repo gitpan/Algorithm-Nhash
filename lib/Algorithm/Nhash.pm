@@ -1,5 +1,11 @@
 package Algorithm::Nhash;
-
+BEGIN {
+  $Algorithm::Nhash::DIST = 'Algorithm-Nhash';
+}
+BEGIN {
+  $Algorithm::Nhash::VERSION = '0.002';
+}
+# ABSTRACT: Exim nhash algorithm
 use warnings;
 use strict;
 
@@ -9,9 +15,54 @@ use vars qw( @ISA @EXPORT_OK );
 @ISA = qw( Exporter );
 @EXPORT_OK = qw( nhash );
 
+
+sub new {
+    my($class, @div) = @_;
+    return bless \@div, $class;
+}
+
+
+my @primes = qw( 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79
+                 83 89 97 101 103 107 109 113);
+
+sub nhash {
+    my($string, @div) = @_;
+    if (ref $string) {          # called as a method
+        # $string is actually $self
+        ($string, @div) = ($div[0], @$string);
+    }
+
+    #warn "'$string' @div";
+
+    my($sum, $i);
+    foreach my $val (split //, $string) {
+        $i += 28; $i %= 29;
+        $sum += $primes[$i] * ord($val);
+    }
+
+    return $sum unless @div;
+    my @ret;
+    while (my $div = pop @div) {
+        unshift @ret, $sum % $div;
+        $sum = int($sum / $div);
+    }
+
+    return wantarray ? @ret : join '/', @ret;
+}
+
+
+1;
+
+__END__
+=pod
+
 =head1 NAME
 
 Algorithm::Nhash - Exim nhash algorithm
+
+=head1 VERSION
+
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -61,11 +112,9 @@ Since the result is typically a 20-30 bit number, the product of all the
 divisors shouldn't be more than about 2**20 or the returned values will not
 be evenly-distributed.
 
-=head1 FUNCTIONS
+=head1 FUNCTIONS AND METHODS
 
-=over 4
-
-=item B<new>
+=head2 new
 
  use Algorithm::Nhash;
  my $nhash = new Algorithm::Nhash 8, 64;
@@ -73,14 +122,7 @@ be evenly-distributed.
 This creates a new Algorithm::Nhash object that squirrels away the divisors
 for later use.
 
-=cut
-
-sub new {
-  my($class, @div) = @_;
-  return bless \@div, $class;
-}
-
-=item B<nhash>
+=head2 nhash
 
  # OO invocation
  print $nhash->nhash('supercalifragilisticexpialidocious');
@@ -92,42 +134,6 @@ This calculates the nhash of the given string. In scalar context, it returns
 the nhash values as a string with slashes separating the components, like
 C<"6/33">. In list context, it returns a list of values like C<(6, 33)>.
 
-=cut
-
-my @primes = qw( 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79
-                 83 89 97 101 103 107 109 113);
-
-sub nhash {
-  my($string, @div) = @_;
-  if(ref $string) { # called as a method
-    # $string is actually $self
-    ($string, @div) = ($div[0], @$string);
-  }
-
-  #warn "'$string' @div";
-
-  my($sum, $i);
-  foreach my $val (split //, $string) {
-    $i += 28; $i %= 29;
-    $sum += $primes[$i] * ord($val);
-  };
-
-  return $sum unless @div;
-  my @ret;
-  while(my $div = pop @div) {
-    unshift @ret, $sum % $div;
-    $sum = int($sum / $div);
-  }
-
-  return wantarray ? @ret : join '/', @ret;
-}
-
-
-
-=back
-
-=head1 BUGS
-
 =head1 SEE ALSO
 
 http://www.exim.org/exim-html-current/doc/html/spec_html/ch11.html (search
@@ -135,20 +141,14 @@ for nhash.)
 
 =head1 AUTHOR
 
-All code and documentation by Peter Corlett <abuse@cabal.org.uk>.
+Peter Corlett <abuse@cabal.org.uk>
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2008 Peter Corlett <abuse@cabal.org.uk>. All rights
-reserved.
+This software is copyright (c) 2011 by Peter Corlett.
 
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=head1 SUPPORT / WARRANTY
-
-This is free software. IT COMES WITHOUT WARRANTY OF ANY KIND.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
 
-1;

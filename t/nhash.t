@@ -18,17 +18,17 @@ is(nhash('supercalifragilisticexpialidocious', 8, 64), '6/33',
    'scalar two-value nhash');
 
 is_deeply(
-          [nhash('supercalifragilisticexpialidocious', 8, 64)],
-          [6, 33],
-          'list two-value nhash');
+    [nhash('supercalifragilisticexpialidocious', 8, 64)],
+    [6, 33],
+    'list two-value nhash');
 
 my $nhash = new Algorithm::Nhash 8, 64;
 
 is($nhash->nhash('supercalifragilisticexpialidocious'), '6/33',
-      'scalar two-value OO nhash');
+   'scalar two-value OO nhash');
 
 is_deeply(
-          [$nhash->nhash('supercalifragilisticexpialidocious')],
-          [6, 33],
-          'list two-value OO nhash');
+    [$nhash->nhash('supercalifragilisticexpialidocious')],
+    [6, 33],
+    'list two-value OO nhash');
 
